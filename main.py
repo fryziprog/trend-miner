@@ -10,11 +10,15 @@ def main():
     
     unigram_results = compare_periods(df, split_date="2026-03-08",ngram_size=1)
     bigram_results = compare_periods(df, split_date="2026-03-08",ngram_size=2)
+    trigram_results = compare_periods(df, split_date="2026-03-08",ngram_size=3)
+    
     
     unigram_report = build_report(unigram_results, title="TREND MINER REPORT - UNIGRAMAS")
     bigram_report = build_report(bigram_results, title="TREND MINER REPORT - BIGRAMAS")
+    trigram_report = build_report(trigram_results, title="TREND MINER REPORT - TRIGRAMAS")
     
-    full_report = unigram_report + "\n\n" + bigram_report
+    
+    full_report = unigram_report + "\n\n" + bigram_report + "\n\n" + trigram_report
     
     
     print(full_report)
