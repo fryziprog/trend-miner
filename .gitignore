@@ -1,0 +1,33 @@
+# ambientes virtuais
+.venv/
+venv/
+env/
+
+# cache python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# arquivos de ambiente
+.env
+
+# logs
+*.log
+
+# arquivos gerados
+data/processed/
+
+# banco de dados
+*.db
+
+# vscode
+.vscode/
+
+# pyright / mypy
+.mypy_cache/
+.pytest_cache/
