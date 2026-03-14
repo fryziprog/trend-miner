@@ -7,12 +7,19 @@ from reports.reporter import build_report
 
 def main():
     df = pd.read_csv("data/raw/sample_data.csv")
-    results = compare_periods(df, split_date="2026-03-08")
-    report = build_report(results)
     
-    print(report)
+    unigram_results = compare_periods(df, split_date="2026-03-08",ngram_size=1)
+    bigram_results = compare_periods(df, split_date="2026-03-08",ngram_size=2)
+    
+    unigram_report = build_report(unigram_results, title="TREND MINER REPORT - UNIGRAMAS")
+    bigram_report = build_report(bigram_results, title="TREND MINER REPORT - BIGRAMAS")
+    
+    full_report = unigram_report + "\n\n" + bigram_report
+    
+    
+    print(full_report)
     
     with open("data/processed/report.txt", "w", encoding="utf-8") as file:
-        file.write(report)
+        file.write(full_report)
 if __name__ == "__main__":
     main()
