@@ -8,4 +8,15 @@ def tokenize(text: str) -> list[str]:
         and len(token) > 2
         and not token.isdigit()
     ]
-    return tokens
+    
+    #remover repeticoes consecutivas
+    
+    cleaned = []
+    prev = None
+    
+    for token in tokens:
+        if token != prev:
+            cleaned.append(token)
+        prev = token
+        
+    return cleaned
