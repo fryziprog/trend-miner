@@ -1,7 +1,7 @@
 from collections import Counter
 from processing.cleaner import clean_text
 from processing.tokenizer import tokenize
-from processing.ngramas import generate_ngrams
+from processing.ngrams import generate_ngrams
 
 #Ele pega todos os títulos e conta:
 #bigramas

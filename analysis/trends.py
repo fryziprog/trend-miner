@@ -2,7 +2,8 @@ import pandas as pd
 from analysis.frequencies import count_tokens
 from processing.cleaner import clean_text
 from processing.tokenizer import tokenize
-from processing.ngramas import generate_ngrams
+from processing.ngrams import generate_ngrams
+from analysis.common import split_last_periods, get_current_period, compare_counters, rank_counter
 
 def build_counter_from_titles(titles, ngram_size: int = 1):
     token_lists = []
@@ -44,5 +45,11 @@ def compare_periods(df: pd.DataFrame, split_date: str, ngram_size: int = 1) :
     
     results.sort(key=lambda x: (-x[1], -x[2], x[0]))
     return results 
-      
+def compare_last_periods(df: pd.DataFrame, days_current: int = 7, days_previous: int = 7, ngram_size: int = 1):
+    previous_df, current_df = split_last_periods(df, days_current, days_previous)
+
+    previous_counter = build_counter_from_titles(previous_df["title"], ngram_size=ngram_size)
+    current_counter = build_counter_from_titles(current_df["title"], ngram_size=ngram_size)
+
+    return compare_counters(previous_counter, current_counter)
     

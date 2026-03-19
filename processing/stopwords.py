@@ -15,11 +15,12 @@ STOPWORDS = {
 
     # internet genérico
     "best","getting","popular","similar","official",
-    "video","audio","lyrics","mix","playlist",
+    "video","audio","lyrics","mix","playlist","free",
 
     # música genérico
     "beat","beats","type","instrumental","prod",
-    "remix","edit","version","loop","sample",
+    "remix","edit","version","loop","sample","profit",
+    "by"
 
     # dataset atual
     "artists","artist","tutorial",

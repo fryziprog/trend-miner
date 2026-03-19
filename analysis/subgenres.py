@@ -3,7 +3,9 @@ import pandas as pd
 
 from processing.cleaner import clean_text
 from processing.tokenizer import tokenize
-from processing.ngramas import generate_ngrams
+from processing.ngrams import generate_ngrams
+from analysis.common import split_last_periods, compare_counters, rank_counter
+from analysis.common import split_last_periods, get_current_period, compare_counters, rank_counter
 
 SUBGENRE_KEYWORDS = {
     "dark trap",
@@ -89,51 +91,16 @@ def rank_current_subgeners(df: pd.DataFrame, split_date: str):
     return results
 
 def compare_subgenre_last_periods(df: pd.DataFrame, days_current: int = 7, days_previous: int = 7):
-    df = df.copy()
-    df["date"] = pd.to_datetime(df["date"])
-    
-    max_date = df["date"].max().normalize()
-    current_start = max_date - pd.Timedelta(days=days_current -1)
-    previous_end = current_start - pd.Timedelta(days=1)
-    previous_start = previous_end - pd.Timedelta(days=days_previous - 1)
-    
-    current_df = df[(df["date"] >= current_start) & (df["date"] <= max_date)]
-    previous_df = df[(df["date"] >= previous_start) & (df["date"] <= previous_end)]
+    previous_df, current_df = split_last_periods(df, days_current, days_previous)
     
     prev_counter = extract_subgenre_signals(previous_df["title"])
     curr_counter = extract_subgenre_signals(current_df["title"])
     
-    all_terms = set(prev_counter.keys() | set(curr_counter.keys()))
-    results = []
-    
-    for term in all_terms:
-        prev_freq = prev_counter.get(term, 0)
-        curr_freq = curr_counter.get(term, 0)
-        
-        if curr_freq == 0:
-            continue
-        
-        score = (curr_freq + 1) / (prev_freq + 1)
-        results.append((term, score, curr_freq, prev_freq))
-        
-        results.sort(key=lambda x: (-x[1], -x[2], x[0]))
-        return results
+    return compare_counters(prev_counter, curr_counter)
     
 def rank_current_subgenres_last_period(df: pd.DataFrame, days_current: int = 7):
-    df = df.copy()
-    df["date"] = pd.to_datetime(df["date"])
+    _, current_df = split_last_periods(df, days_current, days_previous=1)
     
-    max_date = df["date"].max().normalize()
-    current_start = max_date - pd.Timedelta(days=days_current -1)
-    
-    current_df = df[(df["date"] >= current_start) & (df["date"] <= max_date)]
     counter = extract_subgenre_signals(current_df["title"])
-    
-    results = []
-    
-    for term, freq in counter.items():
-        results.append((term,freq))
-        
-        results.sort(key=lambda x: (-x[1], x[0]))
-        return results
+    return rank_counter(counter)
             
