@@ -4,11 +4,14 @@ from processing.cleaner import clean_text
 from processing.tokenizer import tokenize
 from processing.ngrams import generate_ngrams
 from analysis.common import split_last_periods, get_current_period, compare_counters, rank_counter
+from processing.cleaner import strip_type_beat_extras
+
 
 def build_counter_from_titles(titles, ngram_size: int = 1):
     token_lists = []
     
     for title in titles:
+        title = strip_type_beat_extras(title)
         cleaned = clean_text(title)
         tokens = tokenize(cleaned)
 

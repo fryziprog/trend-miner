@@ -3,19 +3,140 @@ import pandas as pd
 import html
 import re
 from collections import Counter
+from analysis.common import compare_counters
 
 nlp = spacy.load("en_core_web_sm")
 
 ALLOWED_LABELS = {"PERSON", "ORG", "GPE", "WORK_OF_ART"}
 
 BAD_ENTITY_PARTS ={
-    "free", "type", "beat", "instrumental", "prod", "official",
-    "audio", "video", "lyrics", "mix", "playlist", "beats", "audio",
-    "brand", "new"
+    "free", 
+    "type",
+    "beat",
+    "instrumental",
+    "prod",
+    "official",
+    "audio",
+    "video", 
+    "lyrics",
+    "mix", 
+    "playlist",
+    "beats", 
+    "audio",
+    "brand", 
+    "new",
+    "melodic",
+    "trap",
+    "drill",
+    "rage",
+    "freestyle",
+    "hard",
+    "plug"
 }
 BAD_ENTITY_EXACT ={
-    "alpha", "basics", "chill guitar", "brand new 2026 pluggnb"
+    "alpha", 
+    "basics", 
+    "chill guitar", 
+    "brand new 2026 pluggnb",
+    "esquece",
+    "hills",
+    "treino",
+    "noite sem pressa",
+    "sinto livre"
 }
+
+BAD_ENTITY_EXACT = {
+    "alpha",
+    "basics",
+    "chill guitar",
+    "brand new 2026 pluggnb",
+    "esquece",
+    "hills",
+    "treino",
+    "melodic",
+    "noite sem pressa",
+    "sinto livre",
+    "afrobeat",
+    "erikebeats",
+    "hills trap"
+}
+
+BAD_ENTITY_PARTS = {
+    "free",
+    "type",
+    "beat",
+    "beats",
+    "instrumental",
+    "prod",
+    "official",
+    "lyrics",
+    "video",
+    "audio",
+    "brand",
+    "new",
+    "melodic",
+    "trap",
+    "drill",
+    "plug",
+    "rage",
+    "mix",
+    "playlist",
+    "freestyle",
+    "hard",
+}
+
+KNOWN_RELEVANT_ENTITIES = {
+    "veigh",
+    "alee",
+    "matue",
+    "wiu",
+    "yunk vino",
+    "kayblack",
+    "orochi",
+    "vulgo fk",
+    "tz da coronel",
+    "caio luccas",
+    "leviano",
+    "brandao",
+    "brandao85",
+    "hoodtrap",
+    "cjota",
+    "chefin",
+    "borges",
+    "oruam",
+    "ryu the runner",
+    "don toliver",
+    "travis scott",
+    "future",
+    "playboi carti",
+    "ken carson",
+    "yeat",
+    "cabelinho",
+    "filipe ret",
+    "mc poze do rodo",
+    "mc cabelinho",
+    "js da torre",
+    "pedrin",
+    "nagalli",
+    "lb unico",
+    "raflow",
+    "niink",
+    "klisman",
+    "romano",
+    "senndy",
+    "mateca",
+    "reid",
+    "fab godamn",
+    "franco the sir",
+    "franco",
+    "earkid",
+    "doode",
+    "sotam",
+    "bryson tiller",
+    "kanye west",
+    "vulgo fk",
+}
+
 def normalize_entity_text(text: str) -> str:
     text = html.unescape(str(text))
     text = text.lower().strip()
@@ -40,10 +161,19 @@ def is_valid_entity(text: str, label: str) -> bool:
     
     if len(words) > 4:
         return False
+
+    if all(len(word) == 1 for word in words):
+        return False
     
     if any(word in BAD_ENTITY_PARTS for word in words):
         return False
     
+    if text in KNOWN_RELEVANT_ENTITIES:
+        return False
+    
+    if label not in ALLOWED_LABELS:
+        return False
+        
     return True
 
 def extract_entities(titles):
@@ -74,19 +204,6 @@ def compare_entity_periods(df: pd.DataFrame, split_date: str):
     prev_entities = extract_entities(previous_df["title"])
     curr_entities = extract_entities(current_df["title"])
     
-    all_entities = set(prev_entities.keys()) | set(curr_entities.keys())
-    results = []
-
-    for entity in all_entities:
-        prev_freq = prev_entities.get(entity, 0)
-        curr_freq = curr_entities.get(entity, 0)
-
-        if curr_freq == 0:
-            continue
-
-        score = (curr_freq + 1) / (prev_freq + 1)
-        results.append((entity, score, curr_freq, prev_freq))
-
-    results.sort(key=lambda x: (-x[1], -x[2], x[0]))
-    return results
+    
+    return compare_counters(prev_entities, curr_entities)
     

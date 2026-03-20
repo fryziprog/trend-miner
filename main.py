@@ -4,10 +4,22 @@ from analysis.spacy_entities import compare_entity_periods
 from analysis.subgenres import compare_subgenre_last_periods, rank_current_subgenres_last_period
 from analysis.artist_signals import compare_artist_last_periods, rank_current_artist_signals
 from analysis.br_scene_signals import compare_br_scene_last_periods, rank_current_br_scenes
+from processing.dataset_filters import filter_relevant_rows, filter_type_beat_rows
 from reports.reporter import build_report
 
 def main():
     df = pd.read_csv("data/raw/youtube_music.csv")
+    df = filter_relevant_rows(df)
+    type_beat_df = filter_type_beat_rows(df)
+    
+    print("TOTAL ORIGINAL:", len(df))
+    print("TOTAL TYPE BEAT:", len(type_beat_df),"\n")
+    
+    if len(type_beat_df) < 20:
+        print(" Usando dataset geeral para subgeneros (fallback)")
+        subgenre_df = df
+    else:
+        subgenre_df = type_beat_df
 
     # tendências gerais
     unigram_results = compare_last_periods(df, days_current=7, days_previous=7, ngram_size=1)
@@ -18,12 +30,12 @@ def main():
     entity_results = compare_entity_periods(df, split_date="2026-03-08")
 
     # subgêneros
-    subgenre_results = compare_subgenre_last_periods(df, days_current=7, days_previous=7)
-    current_subgenres = rank_current_subgenres_last_period(df, days_current=7)
+    subgenre_results = compare_subgenre_last_periods(subgenre_df, days_current=7, days_previous=7)
+    current_subgenres = rank_current_subgenres_last_period(subgenre_df, days_current=7)
 
     # artistas
-    artist_results = compare_artist_last_periods(df, days_current=7, days_previous=7)
-    current_artists = rank_current_artist_signals(df, days_current=7)
+    artist_results = compare_artist_last_periods(type_beat_df, days_current=7, days_previous=7)
+    current_artists = rank_current_artist_signals(type_beat_df, days_current=7)
 
     # cenas BR
     br_scene_results = compare_br_scene_last_periods(df, days_current=7, days_previous=7)
@@ -98,7 +110,8 @@ def main():
 
     with open("data/processed/report.txt", "w", encoding="utf-8") as file:
         file.write(full_report)
-
+        
+    
 
 if __name__ == "__main__":
     main()

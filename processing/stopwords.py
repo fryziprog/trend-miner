@@ -20,7 +20,7 @@ STOPWORDS = {
     # música genérico
     "beat","beats","type","instrumental","prod",
     "remix","edit","version","loop","sample","profit",
-    "by"
+    "by", "hills"
 
     # dataset atual
     "artists","artist","tutorial",

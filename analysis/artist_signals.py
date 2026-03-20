@@ -25,7 +25,58 @@ BAD_ARTIST_TERMERS = {
     "rnb", "funk", "beat", "type"," afro", "g a", "x"
     
 }
-
+KNOWN_ARTISTS = {
+    "matue",
+    "veigh",
+    "alee",
+    "teto",
+    "wiu",
+    "yunk vino",
+    "kayblack",
+    "orochi",
+    "vulgo fk",
+    "tz da coronel",
+    "caio luccas",
+    "leviano",
+    "brandao",
+    "brandao85",
+    "hoodtrap",
+    "cjota",
+    "chefin",
+    "borges",
+    "oruam",
+    "ryu the runner",
+    "don toliver",
+    "travis scott",
+    "future",
+    "playboi carti",
+    "ken carson",
+    "yeat",
+    "cabelinho",
+    "filipe ret",
+    "mc poze do rodo",
+    "mc cabelinho",
+    "js da torre",
+    "pedrin",
+    "nagalli",
+    "lb unico",
+    "raflow",
+    "niink",
+    "klisman",
+    "romano",
+    "senndy",
+    "mateca",
+    "reid",
+    "fab godamn",
+    "franco the sir",
+    "franco",
+    "earkid",
+    "doode",
+    "sotam",
+    "bryson tiller",
+    "ye",
+    "kanye west",
+}
 def strip_beat_name(title: str) -> str:
     parts = re.split(r"\s[-]]\s", str(title), maxsplit=1)
     return parts[0].strip()
@@ -38,7 +89,7 @@ def remove_promotional_prefix(text: str) -> str:
     text = re.sub(r"^\s*prod\s+by\s+", "", text, flags=re.IGNORECASE)
     return text.strip()
 
-def nomarlize_artist_candidate(text: str) -> str:
+def normalize_artist_candidate(text: str) -> str:
     text = remove_promotional_prefix(text)
     text = clean_text(text)
     words = text.split()
@@ -90,32 +141,44 @@ def is_valid_artist(text: str) -> bool:
     
     return True
 
+def extract_known_artists_from_text(text: str) -> list[str]:
+    found = []
+    
+    for artist in KNOWN_ARTISTS:
+        if artist in text:
+            found.append(artist)
+    return found
+
 def extract_artist_signals(titles):
     counter = Counter()
-    
+
     for title in titles:
         raw_title = strip_beat_name(title)
-        
+
+        # 1. detectar artistas conhecidos diretamente no título limpo
+        normalized_title = clean_text(remove_promotional_prefix(raw_title))
+        direct_artists = extract_known_artists_from_text(normalized_title)
+
+        for artist in direct_artists:
+            counter[artist] += 1
+
+        # 2. detectar via padrões tipo "X type beat"
         for pattern in PATTERNS:
-            match =re.search(pattern, raw_title, flags=re.IGNORECASE)
-            
+            match = re.search(pattern, raw_title, flags=re.IGNORECASE)
+
             if not match:
                 continue
-            
-            candidate = nomarlize_artist_candidate(match.group(1))
-            
-            if not is_valid_artist(candidate):
-                continue
-            
-            #guarda a collab completa
-            counter[candidate] += 1
-            
-            #guarda artistas seperados
+
+            candidate = normalize_artist_candidate(match.group(1))
+
+            if is_valid_artist(candidate):
+                counter[candidate] += 1
+
             artists = split_artist_collab(candidate)
             for artist in artists:
                 if is_valid_artist(artist):
                     counter[artist] += 1
-                    
+
     return counter
 
 def compare_artist_last_periods(df: pd.DataFrame, days_current: int = 7, days_previous: int = 7):

@@ -9,19 +9,24 @@ from analysis.common import split_last_periods, get_current_period, compare_coun
 
 SUBGENRE_KEYWORDS = {
     "dark trap",
-    "memphis trap",
-    "detroit trap",
-    "flint trap",
+    "trap",
+    "melodic trap",
+    "plug",
     "pluggnb",
-    "afro house",
+    "detroit",
     "jersey club",
     "rage trap",
-    "phonk trap",
     "drill",
     "trapsoul",
     "boom bap",
-    "ambient trap"
+    "trap soul",
+    "rage",
+    "rap nacional",
+    "melodic"
 }
+
+def normalize(text: str) -> str:
+    return text.lower().strip()
 
 
 def extract_subgenre_signals(titles):
@@ -38,8 +43,14 @@ def extract_subgenre_signals(titles):
         all_items = unigrams | bigrams | trigrams
 
         for item in all_items:
-            if item in SUBGENRE_KEYWORDS:
-                counter[item] += 1
+            item_norm = normalize(item)
+            
+            for keyword in SUBGENRE_KEYWORDS:
+                keyword_norm = normalize(keyword)
+                
+                if keyword_norm in item_norm:
+                    counter[keyword_norm] += 1
+
 
     return counter
 
